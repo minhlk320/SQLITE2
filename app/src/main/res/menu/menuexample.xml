@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/quanlynhasach"
+        android:title="QUẢN LÝ NHÀ SÁCH">
+    </item>
+
+    <item
+        android:id="@+id/thongtinsach"
+        android:title="Thông tin sách">
+    </item>
+    <item
+        android:id="@+id/thongtintacgia"
+        android:title="Thông tin tác giả">
+    </item>
+
+    <item
+        android:id="@+id/timkiem"
+        android:title="Tìm kiếm Sách/Tác giả">
+    </item>
+
+</menu>
