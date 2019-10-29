@@ -1,7 +1,8 @@
 package com.minh.sqlite;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -10,76 +11,111 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.ArrayList;
 
 public class BookActivity extends AppCompatActivity {
-    EditText et_id_book, et_title, et_id_author;
-    Button btn_Select, btn_Delete, btn_update, btnInsert;
-    GridView gridView_book;
-    String tieuDe="";
-    int id=0, idTacGia=0;
+    EditText editText_maso, editText_tieude, editText_masotacgia;
+    Button button_select, button_save, button_update, button_delete, button_exit;
+    GridView gridView_display;
     DBHelper dbHelper;
+    private ArrayAdapter<String> adapter;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book);
-        connectView();
-        dbHelper = new DBHelper(BookActivity.this);
-        btnInsert.setOnClickListener(new View.OnClickListener() {
+        mapview();
+
+        button_select.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(et_id_book.getText().toString().trim().equals("") || et_title.getText().toString().trim().equals("") || et_id_author.getText().toString().trim().equals(""))
-                    Toast.makeText(BookActivity.this,"Không được bỏ trống!",Toast.LENGTH_LONG).show();
-                else {
-                    tieuDe = et_title.getText().toString();
-                    idTacGia = Integer.parseInt(et_id_author.getText().toString());
-                    id = Integer.parseInt(et_id_book.getText().toString());
-                    int x = dbHelper.insertBook(new Book(id,tieuDe,idTacGia));
-                    if(x!=0)
-                        Toast.makeText(BookActivity.this,"Put item succeeded!",Toast.LENGTH_LONG).show();
-                    else
-                        Toast.makeText(BookActivity.this,"Put item Failed!",Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-        btn_Select.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(et_id_book.getText().toString().equals("")){
-                    ArrayList<Book> listBook =  dbHelper.getAllBooks();
-                    ArrayList<String> list = new ArrayList<>();
-                    list.add("Mã Số");
-                    list.add("Tiêu đề");
-                    list.add("Tác giả");
-                    for(Book b:listBook){
-                        list.add(b.getId()+"");
-                        list.add(b.getTitle());
-                        list.add(b.getAuthor()+"");
-                    }
-                    ArrayAdapter<String> myAdapter = new ArrayAdapter<String>(BookActivity.this,android.R.layout.simple_list_item_1,list);
-                    gridView_book.setAdapter(myAdapter);
+                ArrayList<String> list_string = new ArrayList<>();
+                String uri = "content://com.example.student.contentprovider/bookdata";
+                Uri book = Uri.parse(uri);
+                Cursor cursor = getContentResolver().query(book, null, null, null, "title");
+                if (cursor != null) {
+                    cursor.moveToFirst();
+                    do {
+                        try {
+                            list_string.add(cursor.getInt(0) + "");
+                            list_string.add(cursor.getString(1) + "");
+                            list_string.add(cursor.getInt(2) + "");
+                        }catch (Exception e){
+                            list_string.add("Không có dữ liệu");
+                        }
+                    } while (cursor.moveToNext());
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(BookActivity.this,
+                            android.R.layout.simple_list_item_1, list_string);
+                    gridView_display.setAdapter(adapter);
                 }
                 else{
-                    id = Integer.parseInt(et_id_book.getText().toString());
-                    Book b =  dbHelper.getBookByID(id);
-                    ArrayList<String> list = new ArrayList<>();
-                    list.add(b.getId()+"");
-                    list.add(b.getTitle());
-                    list.add(b.getAuthor()+"");
-                    ArrayAdapter<String> myAdapter = new ArrayAdapter<String>(BookActivity.this,android.R.layout.simple_list_item_1,list);
-                    gridView_book.setAdapter(myAdapter);
+                    Toast.makeText(getApplicationContext(), "Không có kết quả !", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
+        button_save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ContentValues values = new ContentValues();
+                values.put("id_book", editText_maso.getText().toString());
+                values.put("title", editText_tieude.getText().toString());
+                values.put("id_author", editText_masotacgia.getText().toString());
+                String uri = "content://com.example.student.contentprovider/bookdata";
+                Uri book = Uri.parse(uri);
+                Uri insert_uri = getContentResolver().insert(book, values);
+                Toast.makeText(getApplicationContext(), "Lưu thành công !", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        button_update.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ContentValues values = new ContentValues();
+                values.put("id_book", editText_maso.getText().toString());
+                values.put("title", editText_tieude.getText().toString());
+                values.put("id_author", editText_masotacgia.getText().toString());
+                String uri = "content://com.example.student.contentprovider/bookdata";
+                Uri book = Uri.parse(uri);
+                int insert_uri = getContentResolver().update(book,values,"id_book=?",new String[]{editText_maso.getText().toString()});
+                if(insert_uri>0)
+                Toast.makeText(getApplicationContext(), "Cap nhat thành công !", Toast.LENGTH_SHORT).show();
+                else
+                Toast.makeText(getApplicationContext(), "Cap nhat that bai!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        button_delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String [] id = {editText_maso.getText().toString()};
+                String uri = "content://com.example.student.contentprovider/bookdata";
+                Uri book = Uri.parse(uri);
+                int insert_uri = getContentResolver().delete(book,"id_book = ?",id);
+                if(insert_uri>0)
+                Toast.makeText(getApplicationContext(), "xoa thành công !", Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(getApplicationContext(), "xoa ko thành công !", Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
-    void connectView(){
-        et_id_author = findViewById(R.id.etId_author);
-        et_id_book = findViewById(R.id.etID_BOOK);
-        et_title = findViewById(R.id.etTitle);
-        gridView_book = findViewById(R.id.girdView_book);
-        btn_Select = findViewById(R.id.btnSelect);
-        btn_Delete = findViewById(R.id.btnDelete);
-        btn_update = findViewById(R.id.btnUpdate);
-        btnInsert = findViewById(R.id.btnSave);
+
+    public void mapview(){
+        editText_maso = (EditText) findViewById(R.id.editText_maso);
+        editText_tieude = (EditText) findViewById(R.id.editText_tieude);
+        editText_masotacgia = (EditText) findViewById(R.id.editText_masotacgia);
+
+        button_select = (Button) findViewById(R.id.button_select);
+        button_save = (Button) findViewById(R.id.button_save);
+        button_update = (Button) findViewById(R.id.button_update);
+        button_delete = (Button) findViewById(R.id.button_delete);
+        button_exit = (Button) findViewById(R.id.button_exit);
+
+        gridView_display = (GridView) findViewById(R.id.gridView_display);
+        dbHelper = new DBHelper(BookActivity.this);
     }
 }

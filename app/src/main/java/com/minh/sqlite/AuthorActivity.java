@@ -1,7 +1,8 @@
 package com.minh.sqlite;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -10,81 +11,83 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.minh.sqlite.DBHelper;
+import com.minh.sqlite.R;
+
 import java.util.ArrayList;
 
 public class AuthorActivity extends AppCompatActivity {
-    EditText et_id_author, et_name, et_address,et_email;
-    Button btn_Select, btn_Delete, btn_update, btnInsert;
-    GridView gridView_author;
-    String name="", address ="", email ="";
-    int id=0, idTacGia=0;
+    EditText editText_maso, editText_diachi, editText_email, editText_hoten;
+    Button button_select, button_save, button_update, button_delete, button_exit;
+    GridView gridView_display;
     DBHelper dbHelper;
+    private ArrayAdapter<String> adapter;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_author);
-        connectView();
-        dbHelper = new DBHelper(AuthorActivity.this);
-        btnInsert.setOnClickListener(new View.OnClickListener() {
+        mapview();
+
+        button_select.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                id = Integer.parseInt(et_id_author.getText().toString());
-                name = et_name.getText().toString();
-                address = et_address.getText().toString();
-                email = et_email.getText().toString();
-                if(id==0 || name.equals("")||address.equals("")||email.equals(""))
-                    Toast.makeText(AuthorActivity.this,"Không được bỏ trống!",Toast.LENGTH_LONG).show();
-                else {
-                    int x = dbHelper.insertAuthor(new Author(id,name,address,email));
-                    if(x!=0)
-                        Toast.makeText(AuthorActivity.this,"Put item succeeded!",Toast.LENGTH_LONG).show();
-                    else
-                        Toast.makeText(AuthorActivity.this,"Put item Failed!",Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-        btn_Select.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(et_id_author.getText().toString().equals("")){
-                    ArrayList<Author> listAuthor =  dbHelper.getAllAuthors();
-                    ArrayList<String> list = new ArrayList<>();
-                    list.add("Mã Số");
-                    list.add("Tên");
-                    list.add("Địa chỉ");
-                    list.add("Email");
-                    for(Author b:listAuthor){
-                        list.add(b.getId_author()+"");
-                        list.add(b.getName());
-                        list.add(b.getAddress());
-                        list.add(b.getEmail());
-                    }
-                    ArrayAdapter<String> myAdapter = new ArrayAdapter<String>(AuthorActivity.this,android.R.layout.simple_list_item_1,list);
-                    gridView_author.setAdapter(myAdapter);
+                ArrayList<String> list_string = new ArrayList<>();
+                String uri = "content://com.example.student.contentprovider/authordata";
+                Uri author = Uri.parse(uri);
+                Cursor cursor = getContentResolver().query(author, null, null, null, "name");
+                if (cursor != null) {
+                    cursor.moveToFirst();
+                    do {
+                        list_string.add(cursor.getInt(0) + "");
+                        list_string.add(cursor.getString(1) + "");
+                        list_string.add(cursor.getString(2) + "");
+                        list_string.add(cursor.getString(3) + "");
+                    } while (cursor.moveToNext());
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(AuthorActivity.this,
+                            android.R.layout.simple_list_item_1, list_string);
+                    gridView_display.setAdapter(adapter);
                 }
                 else{
-                    id = Integer.parseInt(et_id_author.getText().toString());
-                    Author b =  dbHelper.getAuthorByID(id);
-                    ArrayList<String> list = new ArrayList<>();
-                    list.add(b.getId_author()+"");
-                    list.add(b.getName());
-                    list.add(b.getAddress());
-                    list.add(b.getEmail());
-                    ArrayAdapter<String> myAdapter = new ArrayAdapter<String>(AuthorActivity.this,android.R.layout.simple_list_item_1,list);
-                    gridView_author.setAdapter(myAdapter);
+                    Toast.makeText(getApplicationContext(), "Không có kết quả !", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
+        button_save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ContentValues values = new ContentValues();
+                values.put("id_author", editText_maso.getText().toString());
+                values.put("address", editText_diachi.getText().toString());
+                values.put("name", editText_hoten.getText().toString());
+                values.put("email", editText_email.getText().toString());
+                String uri = "content://com.example.student.contentprovider/authordata";
+                Uri author = Uri.parse(uri);
+                Uri insert_uri = getContentResolver().insert(author, values);
+                Toast.makeText(getApplicationContext(), "Lưu thành công !", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
     }
-    void connectView(){
-        et_id_author = findViewById(R.id.etId_author);
-        et_name = findViewById(R.id.etName);
-        et_address = findViewById(R.id.et_address);
-        et_email = findViewById(R.id.et_email);
-        gridView_author = findViewById(R.id.girdView_author);
-        btn_Select = findViewById(R.id.btnSelect);
-        btn_Delete = findViewById(R.id.btnDelete);
-        btn_update = findViewById(R.id.btnUpdate);
-        btnInsert = findViewById(R.id.btnSave);
+
+    public void mapview(){
+        editText_maso = (EditText) findViewById(R.id.editText_maso);
+        editText_hoten = (EditText) findViewById(R.id.editText_hoten);
+        editText_diachi = (EditText) findViewById(R.id.editText_diachi);
+        editText_email = (EditText) findViewById(R.id.editText_email);
+
+        button_select = (Button) findViewById(R.id.button_select);
+        button_save = (Button) findViewById(R.id.button_save);
+        button_update = (Button) findViewById(R.id.button_update);
+        button_delete = (Button) findViewById(R.id.button_delete);
+        button_exit = (Button) findViewById(R.id.button_exit);
+
+        gridView_display = (GridView) findViewById(R.id.gridView_display);
+        dbHelper = new DBHelper(AuthorActivity.this);
     }
 }

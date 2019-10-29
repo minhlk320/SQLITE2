@@ -9,9 +9,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SearchActivity"></activity>
-        <activity android:name=".AuthorActivity" />
-        <activity android:name=".BookActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,6 +16,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <provider
+            android:name=".MyContentProvider"
+            android:authorities="com.example.student.contentprovider"
+            android:enabled="true"
+            android:exported="true" />
+        <provider
+            android:name=".MyContentProviderAuthor"
+            android:authorities="com.example.student.contentprovider"
+            android:enabled="true"
+            android:exported="true" />
+        <activity android:name=".BookActivity" />
+        <activity android:name=".AuthorActivity" />
+        <activity android:name=".SearchActivity"></activity>
     </application>
+    <permission android:name="com.minh.sqlite"
+        android:label="Read Database"
+        android:protectionLevel="normal"
+        ></permission>
 
 </manifest>
