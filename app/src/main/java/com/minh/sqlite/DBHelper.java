@@ -21,7 +21,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
         String book = "create table Books(id_book integer primary key, title text, " +
-                "id_author integer)";
+                "id_author integer references Authors(id_author) on delete cascade on update cascade)";
         db.execSQL(book);
     }
 

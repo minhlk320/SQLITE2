@@ -36,7 +36,7 @@ public class AuthorActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 ArrayList<String> list_string = new ArrayList<>();
-                String uri = "content://com.example.student.contentprovider/authordata";
+                String uri = "content://com.example.student.contentproviderauthor/authordata";
                 Uri author = Uri.parse(uri);
                 Cursor cursor = getContentResolver().query(author, null, null, null, "name");
                 if (cursor != null) {
@@ -65,7 +65,7 @@ public class AuthorActivity extends AppCompatActivity {
                 values.put("address", editText_diachi.getText().toString());
                 values.put("name", editText_hoten.getText().toString());
                 values.put("email", editText_email.getText().toString());
-                String uri = "content://com.example.student.contentprovider/authordata";
+                String uri = "content://com.example.student.contentproviderauthor/authordata";
                 Uri author = Uri.parse(uri);
                 Uri insert_uri = getContentResolver().insert(author, values);
                 Toast.makeText(getApplicationContext(), "Lưu thành công !", Toast.LENGTH_SHORT).show();

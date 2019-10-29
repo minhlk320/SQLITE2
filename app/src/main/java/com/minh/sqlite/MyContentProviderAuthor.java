@@ -14,7 +14,7 @@ import android.text.TextUtils;
 import java.util.HashMap;
 
 public class MyContentProviderAuthor extends ContentProvider {
-    static final String AUTHORITY = "com.example.student.contentprovider";
+    static final String AUTHORITY = "com.example.student.contentproviderauthor";
     static final String CONTENT_PATH = "authordata";
     static final String URL = "content://" + AUTHORITY + "/" + CONTENT_PATH;
     static final Uri CONTENT_URI = Uri.parse(URL);
